@@ -52,6 +52,10 @@ jobs:
             echo "Waiting for postgres..."
             sleep 2
           done
+      - name: 🛠️ Set up notes table
+        run: |
+          sudo apt-get install -y postgresql-client
+          PGPASSWORD=$POSTGRES_PASSWORD psql -h $POSTGRES_HOST -U $POSTGRES_USER -d $POSTGRES_DB -p $POSTGRES_PORT -c "CREATE TABLE IF NOT EXISTS notes (id SERIAL PRIMARY KEY, content TEXT NOT NULL);"
 
       - name: Run tests
         run: pytest > result.log || true
