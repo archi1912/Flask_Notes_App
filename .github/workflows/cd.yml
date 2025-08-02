@@ -1,0 +1,32 @@
+name: CD - Deploy Flask App via Ansible
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name:  Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+
+      - name: 🔧 Install Ansible
+        run: sudo apt-get update && sudo apt-get install -y ansible
+
+      - name:  Create inventory file
+        run: |
+          echo "[web]" > inventory
+          echo "${{ secrets.EC2_HOST }} ansible_user=${{ secrets.EC2_USER }} ansible_ssh_private_key_file=~/.ssh/id_rsa" >> inventory
+
+      - name:  Run Ansible Playbook
+        run: |
+          ansible-playbook -i inventory ansible/playbook.yml \
+            --extra-vars "db_host=${{ secrets.DB_HOST }} db_port=${{ secrets.DB_PORT }} db_name=${{ secrets.DB_NAME }} db_user=${{ secrets.DB_USER }} db_password=${{ secrets.DB_PASSWORD }}"
