@@ -18,7 +18,7 @@ jobs:
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
 
-      - name: 🔧 Install Ansible
+      - name: Install Ansible
         run: sudo apt-get update && sudo apt-get install -y ansible
 
       - name:  Create inventory file
@@ -26,7 +26,9 @@ jobs:
           echo "[web]" > inventory
           echo "${{ secrets.EC2_HOST }} ansible_user=${{ secrets.EC2_USER }} ansible_ssh_private_key_file=~/.ssh/id_rsa" >> inventory
 
-      - name:  Run Ansible Playbook
+      - name: Run Ansible Playbook
+        env:
+          ANSIBLE_HOST_KEY_CHECKING: "False"
         run: |
           ansible-playbook -i inventory ansible/playbook.yml \
             --extra-vars "db_host=${{ secrets.DB_HOST }} db_port=${{ secrets.DB_PORT }} db_name=${{ secrets.DB_NAME }} db_user=${{ secrets.DB_USER }} db_password=${{ secrets.DB_PASSWORD }}"
