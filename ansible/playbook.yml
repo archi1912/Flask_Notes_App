@@ -26,6 +26,27 @@
         src: .env.j2
         dest: /home/{{ ansible_user }}/flask_notes_app/.env
 
-    - name: Run the Flask app (for testing)
-      shell: |
-        nohup python3 /home/{{ ansible_user }}/flask_notes_app/app.py > flask.log 2>&1 &
+    - name: Create systemd service file
+      copy:
+        dest: /etc/systemd/system/flaskapp.service
+        content: |
+          [Unit]
+          Description=Flask Notes App
+          After=network.target
+
+          [Service]
+          User=ubuntu
+          WorkingDirectory=/home/ubuntu/flask_notes_app
+          EnvironmentFile=/home/ubuntu/flask_notes_app/.env
+          ExecStart=/usr/bin/python3 app.py
+          Restart=always
+
+          [Install]
+          WantedBy=multi-user.target
+
+    - name: Reload systemd and enable flask service
+      systemd:
+        name: flaskapp
+        enabled: yes
+        daemon_reload: yes
+        state: restarted
