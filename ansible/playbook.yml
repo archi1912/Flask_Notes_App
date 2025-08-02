@@ -13,7 +13,7 @@
 
     - name: Clone the Flask Notes repo
       git:
-        repo: https://github.com/<your-username>/<your-repo>.git
+        repo: https://github.com/archi1912/Flask_Notes_App.git
         dest: /home/{{ ansible_user }}/flask_notes_app
         version: main
 
